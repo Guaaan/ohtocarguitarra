@@ -20,7 +20,7 @@ public class SphereCursor : MonoBehaviour
         //Debug.Log($"OnTriggerEnter llamado con {other.gameObject.name}, Tag: {other.gameObject.tag}");
         //HiglightSelectTarget(other.gameObject);
 
-        if (other.CompareTag("Ampli")|| other.CompareTag("muneco"))
+        if (other.CompareTag("trackable")|| other.CompareTag("muneco"))
         {
             Debug.Log("Esta tocando " + other.tag);
             HiglightSelectTarget(other.gameObject);
