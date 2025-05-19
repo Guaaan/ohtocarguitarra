@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor.Rendering;
 using UnityEngine;
 
 public class CameraRig : MonoBehaviour
@@ -9,9 +10,14 @@ public class CameraRig : MonoBehaviour
     [SerializeField]
     private GameObject mouseIndicator; // Indicador para la posici�n del mouse
 
+    [Header("SphereCursor")]
+    [SerializeField]
+    private SphereCursor sCursor;// Referencia al administrador de entradas
+
     [Header("Dependencies")]
     [SerializeField]
-    private InputManager inputManager; // Referencia al administrador de entradas
+    private InputManager inputManager;
+
     [SerializeField]
     private IsometricCameraController cameraCtrl;
     //private Grid grid;                 // Referencia al grid
@@ -48,6 +54,18 @@ public class CameraRig : MonoBehaviour
        
     }
 
+    void HiglightSelectTarget()
+    {
+        if (sCursor.hoverTrackable)
+        {
+            Debug.Log("Esta tocando " + sCursor.hoveringGameObject);
+            targetselected = sCursor.hoveringGameObject;
+            return;
+        }
+    
+        
+        return;
+    }
 
     private void HandlePrefabInstantiation(Vector3 position)
     {
@@ -60,10 +78,10 @@ public class CameraRig : MonoBehaviour
     private void MoveToCursor(Vector3 position)
     {
         //que vaya al seleccionado
-        if (Input.GetMouseButtonDown(0) && targetselected)
+        if (Input.GetMouseButtonDown(0))
         {
-            Debug.Log(targetselected);
-            cameraCtrl.MovePivotTo(targetselected.transform.position);
+
+            HiglightSelectTarget();
             //cameraCtrl.MovePivotTo(position);
         }
         if (Input.GetKey(KeyCode.RightShift))
@@ -71,6 +89,11 @@ public class CameraRig : MonoBehaviour
             Debug.Log("clickeado " + position); ;
             //muee el pivote hasta pos 
             cameraCtrl.MovePivotTo(position);
+        }
+        if (targetselected)
+        {
+            cameraCtrl.MovePivotTo(targetselected.transform.position);
+
         }
 
     }

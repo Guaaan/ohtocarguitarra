@@ -4,15 +4,13 @@ using UnityEngine;
 
 public class SphereCursor : MonoBehaviour
 {
-    public CameraRig cameraRig;
+    public GameObject hoveringGameObject;
+    public bool hoverTrackable;
+    public GameObject spawn;
     private void Start()
     {
         Rigidbody rb = gameObject.AddComponent<Rigidbody>();
         rb.isKinematic = true; // Para evitar que la física afecte al objeto.
-    }
-    private void Update()
-    {
-
     }
 
     private void OnTriggerEnter(Collider other)
@@ -22,16 +20,15 @@ public class SphereCursor : MonoBehaviour
 
         if (other.CompareTag("trackable")|| other.CompareTag("muneco"))
         {
-            Debug.Log("Esta tocando " + other.tag);
-            HiglightSelectTarget(other.gameObject);
+            Debug.Log("Esta tocando " + other.gameObject);
+            hoverTrackable = true;
+            hoveringGameObject = other.gameObject;
             return;
         }
-        HiglightSelectTarget(null);
+        hoverTrackable = false;
+        hoveringGameObject = spawn;
         return;
     }
 
-    void HiglightSelectTarget(GameObject target)
-    {
-        cameraRig.targetselected = target;
-    }
+  
 }
