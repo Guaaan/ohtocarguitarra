@@ -1,42 +1,61 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI; // Para usar Slider
+using UnityEngine.UI;
+using TMPro; // Importar TextMeshPro
 
 public class GuitarController : MonoBehaviour
 {
     [Header("Audio Clips")]
-    public AudioClip noteF; // Fa
-    public AudioClip noteG; // Sol
-    public AudioClip noteAb; // Lab
-    public AudioClip noteBb; // Sib
-    public AudioClip noteC; // Do
-    public AudioClip noteDb; // Reb
-    public AudioClip noteEb; // Mib
+    public AudioClip noteF;
+    public AudioClip noteG;
+    public AudioClip noteAb;
+    public AudioClip noteBb;
+    public AudioClip noteC;
+    public AudioClip noteDb;
+    public AudioClip noteEb;
 
     private AudioSource audioSource;
 
     [Header("Audio Control")]
-    public Slider startSlider; // Slider para modificar el inicio del audio
-    private float startPercentage = 0f; // Representa el porcentaje del inicio (0.0 a 1.0)
+    public Slider startSlider;
+    private float startPercentage = 0f;
 
     public RagdollBalancer ragdollCtrl;
 
+    [Header("Octave Control")]
+    private int currentOctave = 0;
+    private const int MIN_OCTAVE = -3;
+    private const int MAX_OCTAVE = 3;
+
+    [Header("UI Elements")]
+    public TextMeshProUGUI octaveText; // Referencia al texto de la octava
+
     void Start()
     {
-        audioSource = gameObject.GetComponent<AudioSource>();
+        audioSource = GetComponent<AudioSource>();
 
         if (startSlider != null)
         {
             startSlider.minValue = 0f;
             startSlider.maxValue = 1f;
-            startSlider.value = 0f; // Iniciar desde el principio del audio
+            startSlider.value = 0f;
             startSlider.onValueChanged.AddListener(UpdateStartPercentage);
         }
+
+        // Actualizar el texto al iniciar
+        UpdateOctaveText();
     }
 
     void Update()
     {
+        // Octave Control
+        if (Input.GetKeyDown(KeyCode.Q))
+            AdjustOctave(-1);
+        else if (Input.GetKeyDown(KeyCode.E))
+            AdjustOctave(1);
+
+        // Reproducir sonidos
         if (Input.GetKeyDown(KeyCode.Z))
             PlaySound(noteF);
         else if (Input.GetKeyDown(KeyCode.X))
@@ -53,29 +72,28 @@ public class GuitarController : MonoBehaviour
             PlaySound(noteEb);
     }
 
+    /// <summary>
+    /// Reproduce un AudioClip aplicando la octava actual.
+    /// </summary>
+    /// <param name="clip">El AudioClip a reproducir.</param>
     public void PlaySound(AudioClip clip)
     {
         if (clip != null)
         {
-            // Asegurar que el AudioSource se detiene antes de asignar un nuevo clip
             audioSource.Stop();
             audioSource.clip = clip;
 
-            // 🔹 Limitar el inicio máximo al 80% del clip
             float maxStartTime = clip.length * 0.4f;
             float startTime = startPercentage * maxStartTime;
-
-            // Asegurar que startTime esté dentro de los límites
             startTime = Mathf.Clamp(startTime, 0, maxStartTime);
 
-            // Asignar el tiempo y reproducir
             audioSource.time = startTime;
+            audioSource.pitch = Mathf.Pow(2f, currentOctave);
             audioSource.Play();
+
             ragdollCtrl.ApplySpasmForce();
 
-            // 📌 Imprimir información en consola
-            float percentagePlayed = (startTime / clip.length) * 100f;
-            Debug.Log($"🎵 Reproduciendo '{clip.name}' desde {startTime:F2} segundos ({percentagePlayed:F1}% del clip). Duración total: {clip.length:F2} segundos.");
+            Debug.Log($"🎵 Reproduciendo '{clip.name}' en octava {currentOctave} (Pitch: {audioSource.pitch:F2})");
         }
         else
         {
@@ -83,6 +101,36 @@ public class GuitarController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Ajusta la octava actual y actualiza el texto.
+    /// </summary>
+    /// <param name="change">Incremento o decremento de la octava.</param>
+    private void AdjustOctave(int change)
+    {
+        currentOctave = Mathf.Clamp(currentOctave + change, MIN_OCTAVE, MAX_OCTAVE);
+        Debug.Log($"🔄 Octava ajustada a: {currentOctave}");
+        UpdateOctaveText();
+    }
+
+    /// <summary>
+    /// Actualiza el texto de la octava actual.
+    /// </summary>
+    private void UpdateOctaveText()
+    {
+        if (octaveText != null)
+        {
+            octaveText.text = $"Octava: {currentOctave}";
+        }
+        else
+        {
+            Debug.LogWarning("⚠️ No se ha asignado un TextMeshProUGUI para la octava.");
+        }
+    }
+
+    /// <summary>
+    /// Actualiza el porcentaje de inicio del AudioClip.
+    /// </summary>
+    /// <param name="value">Nuevo valor del slider.</param>
     private void UpdateStartPercentage(float value)
     {
         startPercentage = value;

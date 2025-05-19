@@ -9,6 +9,7 @@ public class PanelManager : MonoBehaviour
     {
         public GameObject panelObject;
         public bool isOpen;
+        public bool openOnEsc = false;
     }
 
     [SerializeField] private Panel[] panels;
