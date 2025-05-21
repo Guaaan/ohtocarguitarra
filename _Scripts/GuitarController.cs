@@ -111,6 +111,44 @@ public class GuitarController : MonoBehaviour
         Debug.Log($"🔄 Octava ajustada a: {currentOctave}");
         UpdateOctaveText();
     }
+    /// <summary>
+    /// Reproduce una nota específica según un número del 1 al 7.
+    /// </summary>
+    /// <param name="number">Número de nota (1 a 7)</param>
+    public void PlayNoteByNumber(int number)
+    {
+        AudioClip selectedClip = null;
+
+        switch (number)
+        {
+            case 1:
+                selectedClip = noteF;
+                break;
+            case 2:
+                selectedClip = noteG;
+                break;
+            case 3:
+                selectedClip = noteAb;
+                break;
+            case 4:
+                selectedClip = noteBb;
+                break;
+            case 5:
+                selectedClip = noteC;
+                break;
+            case 6:
+                selectedClip = noteDb;
+                break;
+            case 7:
+                selectedClip = noteEb;
+                break;
+            default:
+                Debug.LogWarning("⚠️ Número de nota fuera de rango (1-7).");
+                return;
+        }
+
+        PlaySound(selectedClip);
+    }
 
     /// <summary>
     /// Actualiza el texto de la octava actual.

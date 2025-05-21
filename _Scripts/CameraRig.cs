@@ -18,6 +18,10 @@ public class CameraRig : MonoBehaviour
     [SerializeField]
     private InputManager inputManager;
 
+    [Header("Muneco")]
+    [SerializeField]
+    private GameObject ragdoll;
+
     [SerializeField]
     private IsometricCameraController cameraCtrl;
     //private Grid grid;                 // Referencia al grid
@@ -56,14 +60,16 @@ public class CameraRig : MonoBehaviour
 
     void HiglightSelectTarget()
     {
-        if (sCursor.hoverTrackable)
+        if (sCursor)
         {
             Debug.Log("Esta tocando " + sCursor.hoveringGameObject);
             targetselected = sCursor.hoveringGameObject;
             return;
         }
-    
-        
+
+        targetselected = ragdoll;
+
+
         return;
     }
 
@@ -86,7 +92,7 @@ public class CameraRig : MonoBehaviour
         }
         if (Input.GetKey(KeyCode.RightShift))
         {
-            Debug.Log("clickeado " + position); ;
+            //Debug.Log("clickeado " + position);
             //muee el pivote hasta pos 
             cameraCtrl.MovePivotTo(position);
         }
@@ -94,6 +100,10 @@ public class CameraRig : MonoBehaviour
         {
             cameraCtrl.MovePivotTo(targetselected.transform.position);
 
+        }
+        else
+        {
+            cameraCtrl.MovePivotTo(ragdoll.transform.position);
         }
 
     }
