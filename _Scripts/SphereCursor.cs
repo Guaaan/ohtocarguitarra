@@ -42,6 +42,14 @@ public class SphereCursor : MonoBehaviour
             hoveringGameObject = other.gameObject;
             return;
         }
+        if (other.CompareTag("sliderhandle"))
+        {
+            currentBtn = other.gameObject;
+            // Puedes cambiar color del handle, por ejemplo:
+            Renderer r = other.GetComponent<Renderer>();
+            if (r) r.material.color = Color.green;
+            return;
+        }
         hoverTrackable = false;
         hoveringGameObject = spawn;
         currentBtn = null;
@@ -66,5 +74,18 @@ public class SphereCursor : MonoBehaviour
         currentBtn = null;
         return;
     }
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.CompareTag("sliderhandle"))
+        {
+            // Restaurar color original
+            Renderer r = other.GetComponent<Renderer>();
+            if (r) r.material.color = Color.white;
 
+            if (currentBtn == other.gameObject)
+            {
+                currentBtn = null;
+            }
+        }
+    }
 }

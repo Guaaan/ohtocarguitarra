@@ -50,10 +50,28 @@ public class GuitarController : MonoBehaviour
     void Update()
     {
         // Octave Control
+        if (Input.GetKeyDown(KeyCode.UpArrow))
+            AdjustOctave(1);
+        else if (Input.GetKeyDown(KeyCode.DownArrow))
+            AdjustOctave(-1);
         if (Input.GetKeyDown(KeyCode.Q))
             AdjustOctave(-1);
         else if (Input.GetKeyDown(KeyCode.E))
             AdjustOctave(1);
+
+        // Control del slider con flechas izquierda/derecha (mantener pulsado)
+        if (startSlider != null)
+        {
+            float step = 0.5f; // velocidad por segundo
+            if (Input.GetKey(KeyCode.RightArrow))
+            {
+                startSlider.value = Mathf.Clamp(startSlider.value - step * Time.deltaTime, startSlider.minValue, startSlider.maxValue);
+            }
+            else if (Input.GetKey(KeyCode.LeftArrow))
+            {
+                startSlider.value = Mathf.Clamp(startSlider.value + step * Time.deltaTime, startSlider.minValue, startSlider.maxValue);
+            }
+        }
 
         // Reproducir sonidos
         if (Input.GetKeyDown(KeyCode.Z))
