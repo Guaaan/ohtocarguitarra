@@ -14,6 +14,9 @@ public class DrumMachineManager : MonoBehaviour
 
     private int currentStep = 0;
     private Coroutine playRoutine;
+    [Header("Layout Settings")]
+    public Vector2 stepButtonSize = new Vector2(1f, 1f); // Escala del botón en X y Z
+    public Vector2 stepSpacing = new Vector2(0.2f, 0.2f); // Espaciado entre botones (X para columnas, Y para filas)
 
     void Start()
     {
