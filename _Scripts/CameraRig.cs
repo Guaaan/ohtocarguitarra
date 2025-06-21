@@ -1,126 +1,116 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEditor.Rendering;
 using UnityEngine;
 
 public class CameraRig : MonoBehaviour
 {
     [Header("Indicators")]
-    [SerializeField]
-    private GameObject mouseIndicator; // Indicador para la posici�n del mouse
+    [SerializeField] private GameObject mouseIndicator;
 
     [Header("SphereCursor")]
-    [SerializeField]
-    private SphereCursor sCursor;// Referencia al administrador de entradas
+    [SerializeField] private SphereCursor sCursor;
 
     [Header("Dependencies")]
-    [SerializeField]
-    private InputManager inputManager;
+    [SerializeField] private InputManager inputManager;
 
     [Header("Muneco")]
-    [SerializeField]
-    private GameObject ragdoll;
+    [SerializeField] private GameObject ragdoll;
 
-    [SerializeField]
-    private IsometricCameraController cameraCtrl;
-    //private Grid grid;                 // Referencia al grid
+    [SerializeField] private IsometricCameraController cameraCtrl;
 
     [Header("Prefab Settings")]
-    [SerializeField]
-    public GameObject prefabToInstantiate; // Prefab que se instanciar�
-    public GameObject targetselected; // el objetivo al que se acercará la camara
-    public Transform instantiatePosition;  // Posici�n base para la instanciaci�n
-    public float yOffset = 1f;             // Desplazamiento en el eje Y
+    [SerializeField] public GameObject prefabToInstantiate;
+    public GameObject targetselected;
+    public Transform instantiatePosition;
+    public float yOffset = 1f;
 
-    [SerializeField]
-    private GameObject gridVisualization;
-    [SerializeField]
+    [SerializeField] private GameObject gridVisualization;
 
     private void Start()
     {
-        //StopPlacement();
+        targetselected = ragdoll; // Cámara comienza siguiendo al objeto por defecto.
     }
 
     private void Update()
     {
-        // Actualizar posici�n de los indicadores
         Vector3 mousePosition = inputManager.GetSelectedMapPosition();
-
-
         mouseIndicator.transform.position = mousePosition;
 
-
-        // Verificar si se debe instanciar un prefab
-        HandlePrefabInstantiation(mousePosition);
-
-        MoveToCursor(mousePosition);
-       
+        HandleInput(mousePosition);
     }
 
-    void HiglightSelectTarget()
+    private void HandleInput(Vector3 mousePosition)
     {
-        if (sCursor)
-        {
-            Debug.Log("Esta tocando " + sCursor.hoveringGameObject);
-            targetselected = sCursor.hoveringGameObject;
-            return;
-        }
-
-        targetselected = ragdoll;
-
-
-        return;
-    }
-
-    private void HandlePrefabInstantiation(Vector3 position)
-    {
-        // Verificar Shift + clic izquierdo
+        // Instanciar objeto con Shift + clic
         if (Input.GetKey(KeyCode.LeftShift) && Input.GetMouseButtonDown(0))
         {
-            InstanciarPrefab(position);
+            InstanciarPrefab(mousePosition);
+            return; // No ejecutar más acciones este frame
         }
-    }
-    private void MoveToCursor(Vector3 position)
-    {
-        //que vaya al seleccionado
+
+        // Si presionas click izquierdo
         if (Input.GetMouseButtonDown(0))
         {
-
-            HiglightSelectTarget();
-            //cameraCtrl.MovePivotTo(position);
+            if (sCursor.currentBtn != null)
+            {
+                Debug.Log("Presionado: " + sCursor.currentBtn.name);
+                sCursor.currentBtn.GetComponent<ButtonController>().PressButton();
+            }
+            else if (sCursor.hoverTrackable)
+            {
+                // Si está tocando un objeto trackable, seleccionarlo como target
+                SelectTarget(sCursor.hoveringGameObject);
+            }
+            else
+            {
+                // Si no hay botón ni trackable, resetear al objeto por defecto
+                ResetTarget();
+            }
         }
+
+        // Movimiento libre con Shift derecho
         if (Input.GetKey(KeyCode.RightShift))
         {
-            //Debug.Log("clickeado " + position);
-            //muee el pivote hasta pos 
-            cameraCtrl.MovePivotTo(position);
-        }
-        if (targetselected)
-        {
-            cameraCtrl.MovePivotTo(targetselected.transform.position);
-
+            cameraCtrl.MovePivotTo(mousePosition);
         }
         else
         {
-            cameraCtrl.MovePivotTo(ragdoll.transform.position);
+            // La cámara siempre sigue el target seleccionado
+            if (targetselected != null)
+            {
+                cameraCtrl.MovePivotTo(targetselected.transform.position);
+            }
+            else
+            {
+                cameraCtrl.MovePivotTo(ragdoll.transform.position);
+            }
         }
-
     }
+
+    private void SelectTarget(GameObject newTarget)
+    {
+        Debug.Log("Nuevo target seleccionado: " + newTarget);
+        targetselected = newTarget;
+    }
+
+    private void ResetTarget()
+    {
+        Debug.Log("Reseteando target al objeto por defecto.");
+        targetselected = ragdoll;
+    }
+
     private void InstanciarPrefab(Vector3 position)
     {
-        // Ajustar la posici�n en el eje Y
         position.y += yOffset;
 
-        // Validar que el prefab sea v�lido
         if (prefabToInstantiate != null)
         {
-            // Instanciar el prefab en la posici�n ajustada
             Instantiate(prefabToInstantiate, position, Quaternion.identity);
         }
         else
         {
-            Debug.LogWarning("PrefabToInstantiate no est� configurado en el Inspector.");
+            Debug.LogWarning("PrefabToInstantiate no está configurado en el Inspector.");
         }
     }
 }
